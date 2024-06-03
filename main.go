@@ -35,6 +35,7 @@ const (
 	CUSR_LINE = "\033[5 q"
 )
 
+// Normal Mode command
 const (
 	N_NEWLINE = 'o'
 	N_INSERT  = 'i'
