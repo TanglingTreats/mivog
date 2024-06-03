@@ -109,16 +109,3 @@ func cursorState(state int) {
 	case COMMAND:
 	}
 }
-
-func getInput(scanner *bufio.Scanner, buf []byte) {
-	for scanner.Scan() {
-		buf = scanner.Bytes()
-		fmt.Print("\033[1F")
-
-		fmt.Println(string(buf))
-
-		if string(buf) == "quit" {
-			os.Exit(0)
-		}
-	}
-}
