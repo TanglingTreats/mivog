@@ -66,11 +66,7 @@ func main() {
 	fmt.Print("\033[2J")
 	fmt.Print("\033[1;2H")
 
-	// buf := make([]byte, 1)
 	reader := bufio.NewReader(os.Stdin)
-	// scanner := bufio.NewScanner(os.Stdin)
-
-	// go getInput(scanner, buf)
 
 	for {
 		cursorState(termState)
