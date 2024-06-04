@@ -18,10 +18,12 @@ type Cursor struct {
 	postion Pos
 }
 
-// Escape sequences
+// ASCII table
 const (
-	ESCAPE  = "\x1B"
-	SIGTERM = "\x03"
+	ETX = 0x03 //      End of Text
+	LF  = 0x0A // '\n' Line Feed
+	CR  = 0x0D // '\r' Carriage Return
+	ESC = 0x1B // '\e' Escape
 )
 
 // Control sequences
@@ -49,19 +51,20 @@ const (
 	NNewline = 'o'
 	NInsert  = 'i'
 	NAppend  = 'a'
+
+	NLeft  = "h"
+	NUp    = "j"
+	NDown  = "k"
+	NRight = "l"
 )
 
 var termState = NORMAL
 
 func main() {
-	// Set terminal to raw
-	state, err := term.GetState(0)
-	if err != nil {
-		log.Fatalln("failed to get state", err)
-	}
+	buf := make([]rune, 0, 2)
 
-	fmt.Println("make raw")
-	_, err = term.MakeRaw(0)
+	// Set terminal to raw
+	state, err := term.MakeRaw(0)
 	if err != nil {
 		log.Fatalln("setting stdin to raw: ", err)
 	}
@@ -86,11 +89,13 @@ func main() {
 			os.Exit(1)
 		}
 
-		if string(key) == SIGTERM {
+		if key == ETX {
+			fmt.Print("\n\r")
+			fmt.Println(string(buf))
 			break
 		}
 
-		if string(key) == ESCAPE {
+		if key == ESC {
 			termState = NORMAL
 		}
 
@@ -100,12 +105,17 @@ func main() {
 				termState = INSERT
 			}
 		case INSERT:
-			fmt.Print("\033[3 q")
-			fmt.Print(string(key))
+			if key == CR {
+				fmt.Print(string(LF) + string(CR))
+				buf = append(buf, LF)
+				buf = append(buf, CR)
+			} else {
+				buf = append(buf, key)
+				fmt.Print(string(key))
+			}
 		case VISUAL:
 		case COMMAND:
 		}
-
 	}
 }
 
