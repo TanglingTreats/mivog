@@ -18,11 +18,19 @@ type Cursor struct {
 	postion Pos
 }
 
+// Escape sequences
 const (
 	ESCAPE  = "\x1B"
 	SIGTERM = "\x03"
 )
 
+// Control sequences
+const (
+	TermErase = "\033[2J"
+	CusrMvTop = "\033[%d;%dH" // template string
+)
+
+// Terminal states
 const (
 	NORMAL = iota
 	INSERT
@@ -30,16 +38,17 @@ const (
 	COMMAND
 )
 
+// Cursor styles
 const (
-	CUSR_BLK  = "\033[0 q"
-	CUSR_LINE = "\033[5 q"
+	CusrBlk  = "\033[0 q"
+	CusrLine = "\033[5 q"
 )
 
 // Normal Mode command
 const (
-	N_NEWLINE = 'o'
-	N_INSERT  = 'i'
-	N_APPEND  = 'a'
+	NNewline = 'o'
+	NInsert  = 'i'
+	NAppend  = 'a'
 )
 
 var termState = NORMAL
@@ -64,8 +73,8 @@ func main() {
 		}
 	}()
 
-	fmt.Print("\033[2J")
-	fmt.Print("\033[1;2H")
+	fmt.Print(TermErase)
+	moveCusrAbs(1, 2)
 
 	reader := bufio.NewReader(os.Stdin)
 
@@ -87,7 +96,7 @@ func main() {
 
 		switch termState {
 		case NORMAL:
-			if key == N_INSERT {
+			if key == NInsert {
 				termState = INSERT
 			}
 		case INSERT:
@@ -100,12 +109,20 @@ func main() {
 	}
 }
 
+func moveCusrAbs(x int, y int) {
+	fmt.Printf(CusrMvTop, x, y)
+}
+
+func moveCusrRel(x int, y int) {
+
+}
+
 func cursorState(state int) {
 	switch state {
 	case NORMAL:
-		fmt.Print(CUSR_BLK)
+		fmt.Print(CusrBlk)
 	case INSERT:
-		fmt.Print(CUSR_LINE)
+		fmt.Print(CusrLine)
 	case VISUAL:
 	case COMMAND:
 	}
