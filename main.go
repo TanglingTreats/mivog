@@ -9,6 +9,11 @@ import (
 	"golang.org/x/term"
 )
 
+type Window struct {
+	width  int
+	height int
+}
+
 type Pos struct {
 	x int
 	y int
@@ -21,9 +26,11 @@ type Cursor struct {
 // ASCII table
 const (
 	ETX = 0x03 //      End of Text
+	BS  = 0x08 //      Backspace
 	LF  = 0x0A // '\n' Line Feed
 	CR  = 0x0D // '\r' Carriage Return
 	ESC = 0x1B // '\e' Escape
+	DEL = 0x7F //      Delete
 )
 
 // Control sequences
@@ -56,9 +63,13 @@ const (
 	NUp    = "j"
 	NDown  = "k"
 	NRight = "l"
+
+	NCommand = ":"
 )
 
 var termState = NORMAL
+var width, height, err = term.GetSize(0)
+var window = Window{width: width, height: height}
 
 func main() {
 	buf := make([]rune, 0, 2)
@@ -105,13 +116,16 @@ func main() {
 				termState = INSERT
 			}
 		case INSERT:
-			if key == CR {
-				fmt.Print(string(LF) + string(CR))
+			switch key {
+			case CR:
+				fmt.Print(string(CR) + string(LF))
 				buf = append(buf, LF)
 				buf = append(buf, CR)
-			} else {
+			case DEL:
+				fmt.Print(string(BS))
+			default:
 				buf = append(buf, key)
-				fmt.Print(string(key))
+				fmt.Printf("%s", string(key))
 			}
 		case VISUAL:
 		case COMMAND:
